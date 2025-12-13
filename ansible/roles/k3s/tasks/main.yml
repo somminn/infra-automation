@@ -1,0 +1,24 @@
+- name: Install k3s master (server)
+  shell: |
+    curl -sfL https://get.k3s.io | \
+    INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644" sh -
+
+- name: Wait for k3s to start
+  shell: sleep 10
+
+- name: Get kubeconfig
+  shell: cat /etc/rancher/k3s/k3s.yaml
+  register: kubeconfig
+
+- name: Ensure .kube directory exists
+  file:
+    path: /root/.kube
+    state: directory
+    mode: '0755'
+
+- name: Save kubeconfig to local ~/.kube/config
+  copy:
+    content: "{{ kubeconfig.stdout }}"
+    dest: "~/.kube/config"
+    mode: 0600
+
